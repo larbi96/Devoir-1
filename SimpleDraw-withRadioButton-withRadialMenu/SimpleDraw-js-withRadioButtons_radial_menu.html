@@ -1,7 +1,7 @@
 <html>
 <head>
 	<link rel="stylesheet" type="text/css" href="css/font-awesome.css" />
-	<script src="src/RadialMenu.js"></script>
+	<!-- <script src="src/RadialMenu.js"></script>-->
 	<style>
 		html, body {
 			margin: 1em;
@@ -56,6 +56,12 @@ var mouse_drag_start_y = 0;
 var mouse_previous_x = 0;
 var mouse_previous_y = 0;
 var buttonIsDown = false;
+//used to count the number of points in stroke and then compare it to the stroke length 
+
+//used mesure to height and width of the rectangle
+var width = 0;
+var height = 0;
+
 // this is the set of strokes already drawn
 var arrayOfStrokes = [];
 // this is the set of strokes that are currently selected
@@ -73,8 +79,7 @@ function mouseDownHandler(e) {
 	var canvas_rectangle = canvas.getBoundingClientRect();
 	var event_x = e.clientX - canvas_rectangle.left;
 	var event_y = e.clientY - canvas_rectangle.top;
-	e.preventDefault();
-    e.stopPropagation();
+
 	//console.log("mouse down");
 	//console.log("   " + event_x + "," + event_y);
 	stroke = [];
@@ -83,8 +88,8 @@ function mouseDownHandler(e) {
 			stroke.push( { x : event_x, y : event_y } );
 			break;
 		case MODE_SELECT :
-		startX = parseInt(e.clientX - canvas_rectangle.left);
-        startY = parseInt(e.clientY - canvas_rectangle.top);
+		   startX = e.clientX - canvas_rectangle.left;
+           startY = e.clientY - canvas_rectangle.top;
 			break;
 		case MODE_MOVE :
 			break;
@@ -98,8 +103,6 @@ function mouseUpHandler(e) {
 	var canvas_rectangle = canvas.getBoundingClientRect();
 	var event_x = e.clientX - canvas_rectangle.left;
 	var event_y = e.clientY - canvas_rectangle.top;
-	e.preventDefault();
-    e.stopPropagation();
 	// console.log("mouse up");
 
 	switch ( mode ) {
@@ -115,6 +118,31 @@ function mouseUpHandler(e) {
 			stroke = [];
 			break;
 		case MODE_SELECT :
+			canvas_context.clearRect(0, 0, canvas.width, canvas.height);
+			redraw();
+		for ( var j = 0; j < arrayOfStrokes.length; ++j ){
+		var ct = 0;		
+			for ( var l = 0; l < arrayOfStrokes[j].stroke.length; ++l ) {
+						var x1 = arrayOfStrokes[j].stroke[l].x;
+						var y1 = arrayOfStrokes[j].stroke[l].y;
+						//to check if the point is inside the rectangle
+						if ((x1 >= startX && x1 <= (startX + width) && y1 >= startY && y1 <= (height + startY))||
+						   (x1 >= startX && x1 <= (startX + width) && y1 <= startY && y1 >= (height + startY))|| 
+						   (x1 <= startX && x1 >= (startX + width) && y1 <= startY && y1 >= (height + startY))||
+						   (x1 <= startX && x1 >= (startX + width) && y1 >= startY && y1 <= (height + startY))
+						   )
+						{
+							ct++;
+						}
+
+						if (ct ==arrayOfStrokes[j].stroke.length){
+						drawStroke({
+							"color": "#ff8000",
+							"stroke": arrayOfStrokes[j].stroke
+						});
+						}
+					}
+				}
 			break;
 		case MODE_MOVE :
 			break;
@@ -127,8 +155,6 @@ function mouseMoveHandler(e) {
 	var canvas_rectangle = canvas.getBoundingClientRect();
 	var event_x = e.clientX - canvas_rectangle.left;
 	var event_y = e.clientY - canvas_rectangle.top;
-	e.preventDefault();
-    e.stopPropagation();
 	//console.log("mouse move");
 	switch ( mode ) {
 		case MODE_DRAW :
@@ -141,20 +167,15 @@ function mouseMoveHandler(e) {
 			if (buttonIsDown) {
 				redraw();
 				//canvas_context.clearRect(0, 0, canvas.width, canvas.height);
-				//mouseX = parseInt(e.clientX -canvas_rectangle.left);
-    			//mouseY = parseInt(e.clientY - canvas_rectangle.top);
-				
-				//var width = mouseX - event_x;
-				//var height = mouseY - event_y;
-				//canvas_context.strokeRect(event_x, event_y, width, height);
 				canvas_context.beginPath();
-				canvas_context.fillStyle = "LightBlue";
-				var width = event_x - startX;
-    			var height = event_y - startY;
+				canvas_context.fillStyle = "#ff8000";
+				
+				 width = event_x - startX;
+    			 height = event_y - startY;
 
-				canvas_context.rect(startX, startY, width,height);
+				canvas_context.rect(startX, startY, width, height);
 				canvas_context.fill();
-				canvas_context.clodePath();
+				canvas_context.closePath();
 			}
 			break;
 		case MODE_MOVE :
@@ -227,7 +248,7 @@ function clearButtonHandler() {
 <script type="module">
 
 	//Source du menu radial: https://github.com/victorqribeiro/radialMenu
-
+/*
 	const radial = new RadialMenu({
       buttons: [
 
@@ -262,7 +283,7 @@ function clearButtonHandler() {
 	  shadowColor: "rgba(0,0,0,0.6)",
 	  shadowOffsetX: 5,
 	  shadowOffsetY: 5
-	});
+	});*/
 </script>
 
 </body>
