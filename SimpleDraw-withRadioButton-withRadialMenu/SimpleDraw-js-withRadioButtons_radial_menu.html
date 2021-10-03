@@ -123,11 +123,14 @@ function mouseUpHandler(e) {
 			stroke = [];
 			break;
 		case MODE_SELECT :
-			
+		for ( var l = 0; l < arrayOfStrokes.length; ++l ){
+				arrayOfStrokes[l].color = stroke_color;
+			}
 			redraw();
-			selectedStrokes = [];
+			
 		for ( var j = 0; j < arrayOfStrokes.length; ++j ){
 		var ct = 0;		
+		
 			for ( var l = 0; l < arrayOfStrokes[j].stroke.length; ++l ) {
 						var x1 = arrayOfStrokes[j].stroke[l].x;
 						var y1 = arrayOfStrokes[j].stroke[l].y;
@@ -142,21 +145,17 @@ function mouseUpHandler(e) {
 						}
 
 						if (ct ==arrayOfStrokes[j].stroke.length){
-							drawStroke({
+							/*drawStroke({
 								"color": "#ff8000",
 								"stroke": arrayOfStrokes[j].stroke
-							});
-							/*selectedStrokes.push(
-									{
-										"color": "#ff8000",
-										"stroke":arrayOfStrokes[j].stroke
-									}
-								);*/
-								arrayOfStrokes[j].color = "#ff8000";
+							});*/
 
+								arrayOfStrokes[j].color = "#ff8000";
+								redraw();
 						}
 					}
 				}
+
 				
 			break;
 		case MODE_MOVE :
@@ -182,42 +181,30 @@ function mouseMoveHandler(e) {
 		case MODE_SELECT :
 			if (buttonIsDown) {
 				redraw();
-				//canvas_context.clearRect(0, 0, canvas.width, canvas.height);
 				canvas_context.beginPath();
 				canvas_context.fillStyle = "#ff8000";
-				
 				 width = event_x - startX;
     			 height = event_y - startY;
-
 				canvas_context.rect(startX, startY, width, height);
 				canvas_context.fill();
 				canvas_context.closePath();
 			}
 			break;
 		case MODE_MOVE :
-		//redraw();
 			disX = event_x - mouse_drag_start_x;
 			disY = event_y - mouse_drag_start_y;
-			//redraw();
 			mouse_drag_start_x = event_x;
 			mouse_drag_start_y = event_y;
 			if(buttonIsDown){
-				/*for ( var j = 0; j < selectedStrokes.length; ++j ){
-					
-					drawStroke2(selectedStrokes[j]); 
-				}*/
-					for(var s = 0; s < arrayOfStrokes.length; ++s ){
-							if(arrayOfStrokes[s].color == "#ff8000"){
-								for(var c = 0; c < arrayOfStrokes[s].stroke.length ; ++c){
-									arrayOfStrokes[s].stroke[c].x += disX;
-									arrayOfStrokes[s].stroke[c].y +=  disY;
-								}
-									//redraw();
-									
-							}
-							redraw();
+				for(var s = 0; s < arrayOfStrokes.length; ++s ){
+					if(arrayOfStrokes[s].color == "#ff8000"){
+						for(var c = 0; c < arrayOfStrokes[s].stroke.length ; ++c){
+							arrayOfStrokes[s].stroke[c].x += disX;
+							arrayOfStrokes[s].stroke[c].y +=  disY;
+						}
 					}
-				
+					redraw();
+				}
 			}
 			break;
 	}
@@ -247,26 +234,6 @@ function drawStroke( stroke_object ) {
 	}
 	canvas_context.strokeStyle = stroke_object.color;
 	canvas_context.stroke();
-}
-
-function drawStroke2( stroke_object ) {
-//Get the stroke from the object
-var s = stroke_object.stroke;
-
-canvas_context.beginPath();
-for ( var i = 0; i < s.length; ++i ) {
-	var x = s[i].x;
-	var y = s[i].y;
-	if ( i === 0 ) {
-		canvas_context.moveTo((x+disX),(y+disY));
-	}
-	else {
-		canvas_context.lineTo((x+disX),(y+disY));
-	}
-}
-canvas_context.strokeStyle = stroke_object.color;
-canvas_context.stroke();
-
 }
 
 var redraw = function() {
