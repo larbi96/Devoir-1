@@ -34,6 +34,7 @@
 var MODE_DRAW = 1;
 var MODE_SELECT = 2;
 var MODE_MOVE = 3;
+var MODE_ERASE = 4; 
 var mode = MODE_DRAW;
 </script>
 
@@ -42,6 +43,7 @@ var mode = MODE_DRAW;
 <label><input id="radio_draw" type='radio' name="radio_mode" onclick='setMode(MODE_DRAW);' checked>Draw</label>
 <label><input id="radio_select" type='radio' name="radio_mode" onclick='setMode(MODE_SELECT);'>Rectangle Select</label>
 <label><input id="radio_move" type='radio' name="radio_mode" onclick='setMode(MODE_MOVE);'>Move Selection</label>
+<label><input id="radio_erase" type='radio' name="radio_mode" onclick='setMode(MODE_ERASE);' >Erase</label>
 <button onclick="clearButtonHandler()">Delete All</button>
 
 <br/>
@@ -65,6 +67,10 @@ var height = 0;
 //used for movig the selection
 var disX = 0;
 var disY = 0;
+
+//used for position of the circle for erasing
+var arcX = 0; 
+var arcY = 0;
 
 // this is the set of strokes already drawn
 var arrayOfStrokes = [];
@@ -98,6 +104,9 @@ function mouseDownHandler(e) {
 		case MODE_MOVE :
 			mouse_drag_start_x  = event_x;
 	    	mouse_drag_start_y = event_y;
+			break;
+		case MODE_ERASE:
+			
 			break;
 	}
 	
@@ -135,6 +144,7 @@ function mouseUpHandler(e) {
 						var x1 = arrayOfStrokes[j].stroke[l].x;
 						var y1 = arrayOfStrokes[j].stroke[l].y;
 						//to check if the point is inside the rectangle
+						// j'ai essayé toutes les possibilité si on dessine le rectable a partir des 4 coins 
 						if ((x1 >= startX && x1 <= (startX + width) && y1 >= startY && y1 <= (height + startY))||
 						   (x1 >= startX && x1 <= (startX + width) && y1 <= startY && y1 >= (height + startY))|| 
 						   (x1 <= startX && x1 >= (startX + width) && y1 <= startY && y1 >= (height + startY))||
@@ -145,22 +155,45 @@ function mouseUpHandler(e) {
 						}
 
 						if (ct ==arrayOfStrokes[j].stroke.length){
-							/*drawStroke({
-								"color": "#ff8000",
-								"stroke": arrayOfStrokes[j].stroke
-							});*/
-
+							    selectedStrokes.push({
+									"stroke" : arrayOfStrokes[j].scroke,
+									"color": "#000000"}
+									);
 								arrayOfStrokes[j].color = "#ff8000";
 								redraw();
 						}
 					}
 				}
 
-				
 			break;
 		case MODE_MOVE :
 
 			break;
+		case MODE_ERASE:
+		for ( var j = 0; j < arrayOfStrokes.length; ++j ){
+		var count = 0;		
+			for ( var l = 0; l < arrayOfStrokes[j].stroke.length; ++l ) {
+				var x1 = arrayOfStrokes[j].stroke[l].x;
+				var y1 = arrayOfStrokes[j].stroke[l].y;
+				//calculate the distance between a point of a stroke and the center of the circle
+				var dis = Math.sqrt((x1 - arcX)**2 + (y1 - arcY)**2)
+				//if the distance is inferior the radius of the circle that means it's inside
+				 if(dis < 30){
+					 // we clear all the points inside the stroke
+					arrayOfStrokes[j].stroke = [];
+				 }
+			}
+		}
+		redraw();
+				var c = canvas.getContext("2d");
+				c.beginPath();
+				canvas_context.strokeStyle = "#A30000";
+				arcX = event_x - 20;
+				arcY = event_y - 20;
+				canvas_context.arc(arcX, arcY, 30, 0, 2 * Math.PI);
+				c.stroke();	
+
+		break;
 	}
 	mouse_previous_x = event_x;
 	mouse_previous_y = event_y;
@@ -203,10 +236,24 @@ function mouseMoveHandler(e) {
 							arrayOfStrokes[s].stroke[c].y +=  disY;
 						}
 					}
+					
+					}
 					redraw();
+					for(var h = 0; h<selectedStrokes.lengt;++h){
+						drawStroke2(selectedStrokes[h]);
 				}
 			}
 			break;
+		case MODE_ERASE:
+				redraw();
+				var c = canvas.getContext("2d");
+				c.beginPath();
+				canvas_context.strokeStyle = "#A30000";
+				arcX = event_x - 20;
+				arcY = event_y - 20;
+				canvas_context.arc(arcX, arcY, 30, 0, 2 * Math.PI);
+				c.stroke();			
+		break;
 	}
 	mouse_previous_x = event_x;
 	mouse_previous_y = event_y;
@@ -236,6 +283,26 @@ function drawStroke( stroke_object ) {
 	canvas_context.stroke();
 }
 
+function drawStroke2( stroke_object ) {
+
+//Get the stroke from the object
+var s = stroke_object.stroke;
+
+canvas_context.beginPath();
+for ( var i = 0; i < s.length; ++i ) {
+	var x = s[i].x;
+	var y = s[i].y;
+	if ( i === 0 ) {
+		canvas_context.moveTo((x+disX),(y+disY));
+	}
+	else {
+		canvas_context.lineTo((x+disX),(y+disY));
+	}
+}
+canvas_context.strokeStyle = stroke_object.color;
+canvas_context.stroke();
+}
+
 var redraw = function() {
 	canvas_context.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -254,7 +321,7 @@ var redraw = function() {
 	}
 }
 
-redraw();
+//redraw();
 
 var setMode = function( m ) {
 	mode = m;
