@@ -43,8 +43,15 @@ var mode = MODE_DRAW;
 <label><input id="radio_draw" type='radio' name="radio_mode" onclick='setMode(MODE_DRAW);' checked>Draw</label>
 <label><input id="radio_select" type='radio' name="radio_mode" onclick='setMode(MODE_SELECT);'>Rectangle Select</label>
 <label><input id="radio_move" type='radio' name="radio_mode" onclick='setMode(MODE_MOVE);'>Move Selection</label>
-<label><input id="radio_erase" type='radio' name="radio_mode" onclick='setMode(MODE_ERASE);' >Erase</label>
+<label><input id="radio_erase" type='radio' name="radio_mode" onclick='setMode(MODE_ERASE);'color = "#000000">Erase</label>
 <button onclick="clearButtonHandler()">Delete All</button>
+<br>
+<ul style="list-style:none;	margin: 0;	float: 	left;	padding: 10px 0 20px;	width: 100%;">
+	<li class="red" style="	display: inline-block; margin: 0 5px 10px; background: #0a0a0a; height: 40px; width: 40px; " onclick = 'setColor(BLACK);' onclick = 'style="boder = 2px;' checked></li>
+	<li class="red" style="	display: inline-block; margin: 0 5px 10px; background: #E74C3C; height: 40px; width: 40px;" onclick = 'setColor(RED);'></li>
+	<li class="blue" style="	display: inline-block; margin: 0 5px 10px; background: #17ca20; height: 40px; width: 40px;" onclick = 'setColor(GREEN);'></li>
+	<li class="yellow" style="	display: inline-block; margin: 0 5px 10px; background: #0528f0; height: 40px; width: 40px;" onclick = 'setColor(BLUE);'></li>
+</ul>
 
 <br/>
 
@@ -83,6 +90,13 @@ var stroke_color = "#000000";
 
 var startX = 0; 
 var startY = 0;
+
+// colors 
+
+ var BLACK = "#000000";
+ var RED = "#E74C3C";
+ var GREEN = "#17ca20";
+ var BLUE = "#0528f0";
 
 function mouseDownHandler(e) {
 	buttonIsDown = true;
@@ -215,11 +229,11 @@ function mouseMoveHandler(e) {
 			if (buttonIsDown) {
 				redraw();
 				canvas_context.beginPath();
-				canvas_context.fillStyle = "#ff8000";
-				 width = event_x - startX;
-    			 height = event_y - startY;
+				width = event_x - startX;
+    			height = event_y - startY;
 				canvas_context.rect(startX, startY, width, height);
-				canvas_context.fill();
+				canvas_context.stroke();
+				canvas_context.strokeStyle = "#ff8000";
 				canvas_context.closePath();
 			}
 			break;
@@ -321,11 +335,15 @@ var redraw = function() {
 	}
 }
 
-//redraw();
+redraw();
 
 var setMode = function( m ) {
 	mode = m;
 	//console.log("The current mode is " + mode );
+}
+
+var setColor = function (c){
+	stroke_color = c;
 }
 
 function clearButtonHandler() {
@@ -333,50 +351,8 @@ function clearButtonHandler() {
 	redraw();
 }
 
-
-
 </script>
 
-<script type="module">
-
-	//Source du menu radial: https://github.com/victorqribeiro/radialMenu
-/*
-	const radial = new RadialMenu({
-      buttons: [
-
-        {'text': '\uF040 \r ', 'action': () => {
-			//alert("Dessiner");
-			setMode(MODE_DRAW);
-			document.getElementById("radio_draw").checked = true;
-		} },
-
-        {'text': '\uF096', 'action': () => {
-			//alert("Sélectionner");
-			setMode(MODE_SELECT);
-			document.getElementById("radio_select").checked = true;
-		} },
-
-        {'text': '\uF255', 'action': () => {
-			//alert("Déplacer");
-			setMode(MODE_MOVE);
-			document.getElementById("radio_move").checked = true;
-		} },
-
-		{'text': '\uF014', 'action': () => {
-			//alert("Tout effacer");
-			clearButtonHandler();
-		} }
-
-      ],
-	  innerCircle: 30,
-	  fontSize: 20,
-	  hoverBackgroundColor: "#afcb38",
-	  shadowBlur: 4,
-	  shadowColor: "rgba(0,0,0,0.6)",
-	  shadowOffsetX: 5,
-	  shadowOffsetY: 5
-	});*/
-</script>
 
 </body>
 </html>
