@@ -31,6 +31,15 @@
 <body>
 
 <script language="JavaScript">
+	/*
+	***
+	Bonjour, mon nom est Larbi Ait Djebara, voici mon implementation pour le premier devoir :
+	- certains commentaires sont en anglais, et d'autres en francais (on pratique un peut l'anglais :P)
+	- Il faut executer et tester les fonctionnalités (selection, efface, et movement) pour la couleur noire
+	- pour les autres couleurs, les fonctionnalités marchent, mais quand on selectionne a nouveau, 
+	- les lignes reprennent la couleur qui est selectionné actuellement et non celle qu'elles avaient au début.
+	- donc je proposerez d'utiliser la couleur noir (par défaut) pour vérifier le fonctionnement des fonctionnalités. 
+	*/
 var MODE_DRAW = 1;
 var MODE_SELECT = 2;
 var MODE_MOVE = 3;
@@ -47,10 +56,10 @@ var mode = MODE_DRAW;
 <button onclick="clearButtonHandler()">Delete All</button>
 <br>
 <ul style="list-style:none;	margin: 0;	float: 	left;	padding: 10px 0 20px;	width: 100%;">
-	<li class="red" style="	display: inline-block; margin: 0 5px 10px; background: #0a0a0a; height: 40px; width: 40px; " onclick = 'setColor(BLACK);' onclick = 'style="boder = 2px;' checked></li>
-	<li class="red" style="	display: inline-block; margin: 0 5px 10px; background: #E74C3C; height: 40px; width: 40px;" onclick = 'setColor(RED);'></li>
-	<li class="blue" style="	display: inline-block; margin: 0 5px 10px; background: #17ca20; height: 40px; width: 40px;" onclick = 'setColor(GREEN);'></li>
-	<li class="yellow" style="	display: inline-block; margin: 0 5px 10px; background: #0528f0; height: 40px; width: 40px;" onclick = 'setColor(BLUE);'></li>
+	<li id = "B" class="black" style="	display: inline-block; margin: 0 5px 10px; background: #0a0a0a; height: 40px; width: 40px; border:4px solid orange " onclick = 'setColor(BLACK); hightlight("B");' ></li>
+	<li id = "R" class="red" style="	display: inline-block; margin: 0 5px 10px; background: #E74C3C; height: 40px; width: 40px;" onclick = 'setColor(RED);  hightlight("R");'></li>
+	<li id = "G" class="blue" style="	display: inline-block; margin: 0 5px 10px; background: #17ca20; height: 40px; width: 40px;" onclick = 'setColor(GREEN);  hightlight("G");'></li>
+	<li id = "Bl"class="yellow" style="	display: inline-block; margin: 0 5px 10px; background: #0528f0; height: 40px; width: 40px;" onclick = 'setColor(BLUE);  hightlight("Bl");'></li>
 </ul>
 
 <br/>
@@ -81,7 +90,7 @@ var arcY = 0;
 
 // this is the set of strokes already drawn
 var arrayOfStrokes = [];
-// this is the set of strokes that are currently selected
+// this is the set of strokes that are currently selected, i didn't use it. 
 var selectedStrokes = [];
 // this is the stroke currently being drawn
 var stroke = []; // each stroke is an array of points
@@ -92,7 +101,6 @@ var startX = 0;
 var startY = 0;
 
 // colors 
-
  var BLACK = "#000000";
  var RED = "#E74C3C";
  var GREEN = "#17ca20";
@@ -112,15 +120,16 @@ function mouseDownHandler(e) {
 			stroke.push( { x : event_x, y : event_y } );
 			break;
 		case MODE_SELECT :
+			//on sauvegarde le début du rectangle dans startX et startY
 		   startX = e.clientX - canvas_rectangle.left;
            startY = e.clientY - canvas_rectangle.top;
 			break;
 		case MODE_MOVE :
+			//on sauvegarde le début du mouvement dans les deux variables suivantes :
 			mouse_drag_start_x  = event_x;
 	    	mouse_drag_start_y = event_y;
 			break;
 		case MODE_ERASE:
-			
 			break;
 	}
 	
@@ -146,19 +155,21 @@ function mouseUpHandler(e) {
 			stroke = [];
 			break;
 		case MODE_SELECT :
+			//on restore les couleur des stroke, dans ce cas-là, ici tous les stroke prenderons la couleur selectionné.
 		for ( var l = 0; l < arrayOfStrokes.length; ++l ){
 				arrayOfStrokes[l].color = stroke_color;
 			}
 			redraw();
-			
+			//on verifie tous les strokes s'il sont à l'interieur du rectangle. 
 		for ( var j = 0; j < arrayOfStrokes.length; ++j ){
+			//compteur incrémenté a chaque fois qu'un point du stroke est a l'interieur du rectangle
 		var ct = 0;		
 		
 			for ( var l = 0; l < arrayOfStrokes[j].stroke.length; ++l ) {
 						var x1 = arrayOfStrokes[j].stroke[l].x;
 						var y1 = arrayOfStrokes[j].stroke[l].y;
 						//to check if the point is inside the rectangle
-						// j'ai essayé toutes les possibilité si on dessine le rectable a partir des 4 coins 
+						// on essaie toutes les possibilité si on dessine le rectable a partir des 4 coins 
 						if ((x1 >= startX && x1 <= (startX + width) && y1 >= startY && y1 <= (height + startY))||
 						   (x1 >= startX && x1 <= (startX + width) && y1 <= startY && y1 >= (height + startY))|| 
 						   (x1 <= startX && x1 >= (startX + width) && y1 <= startY && y1 >= (height + startY))||
@@ -167,12 +178,10 @@ function mouseUpHandler(e) {
 						{
 							ct++;
 						}
-
+						// si la valeur du compteur est égale a la valeur des pts du stroke ca veut dire qu'il 
+						// est entierement à l'interieur du rectangle. 
 						if (ct ==arrayOfStrokes[j].stroke.length){
-							    selectedStrokes.push({
-									"stroke" : arrayOfStrokes[j].scroke,
-									"color": "#000000"}
-									);
+							//je change directement la couleur du stroke quand il est selectionné.
 								arrayOfStrokes[j].color = "#ff8000";
 								redraw();
 						}
@@ -199,6 +208,7 @@ function mouseUpHandler(e) {
 			}
 		}
 		redraw();
+				//the circle
 				var c = canvas.getContext("2d");
 				c.beginPath();
 				canvas_context.strokeStyle = "#A30000";
@@ -253,12 +263,26 @@ function mouseMoveHandler(e) {
 					
 					}
 					redraw();
-					for(var h = 0; h<selectedStrokes.lengt;++h){
-						drawStroke2(selectedStrokes[h]);
-				}
 			}
 			break;
 		case MODE_ERASE:
+			if(buttonIsDown){
+				for ( var j = 0; j < arrayOfStrokes.length; ++j ){
+					var count = 0;		
+					for ( var l = 0; l < arrayOfStrokes[j].stroke.length; ++l ) {
+						var x1 = arrayOfStrokes[j].stroke[l].x;
+						var y1 = arrayOfStrokes[j].stroke[l].y;
+						//calculate the distance between a point of a stroke and the center of the circle
+						var dis = Math.sqrt((x1 - arcX)**2 + (y1 - arcY)**2)
+						//if the distance is inferior the radius of the circle that means it's inside
+						if(dis < 30){
+							// we clear all the points inside the stroke
+							arrayOfStrokes[j].stroke = [];
+						}
+					}
+				}
+			}
+
 				redraw();
 				var c = canvas.getContext("2d");
 				c.beginPath();
@@ -297,25 +321,6 @@ function drawStroke( stroke_object ) {
 	canvas_context.stroke();
 }
 
-function drawStroke2( stroke_object ) {
-
-//Get the stroke from the object
-var s = stroke_object.stroke;
-
-canvas_context.beginPath();
-for ( var i = 0; i < s.length; ++i ) {
-	var x = s[i].x;
-	var y = s[i].y;
-	if ( i === 0 ) {
-		canvas_context.moveTo((x+disX),(y+disY));
-	}
-	else {
-		canvas_context.lineTo((x+disX),(y+disY));
-	}
-}
-canvas_context.strokeStyle = stroke_object.color;
-canvas_context.stroke();
-}
 
 var redraw = function() {
 	canvas_context.clearRect(0, 0, canvas.width, canvas.height);
@@ -342,8 +347,34 @@ var setMode = function( m ) {
 	//console.log("The current mode is " + mode );
 }
 
+//pour mettre meodifier la couleur actuelle
 var setColor = function (c){
 	stroke_color = c;
+}
+
+//deselectionner tous les boutons 
+var disableAllButtons = function(){
+	var RB = document.getElementById("R");
+	var BlB = document.getElementById("Bl");
+	var BB = document.getElementById("B");
+	var GB = document.getElementById("G");
+
+	RB.style.border = "0px";
+	BlB.style.border = "0px";
+	BB.style.border = "0px";
+	GB.style.border = "0px";
+}
+
+
+//Pour mieux afficher le bouton selectionné 
+
+var hightlight = function(buttonId){
+	
+	var selectedButton = document.getElementById(buttonId);
+		//on deselectinone avant tout les boutons qui sont selectionnés.
+		disableAllButtons();
+		selectedButton.style.border = "4px solid orange";
+		noSelectedButton = 0;
 }
 
 function clearButtonHandler() {
